@@ -12,9 +12,7 @@ Download all perl script files (*.pl) and perl module files (*.pm), and place th
 
 
 
-Example:
-1. Download the example file ‘example.tar.xz’ and extract it
-2. Run the command:
+Example: Download the example file ‘example.tar.xz’, extract it and run the command:
 
 	perl script_CGP_main.pl --segment-length=10 --output-file=tmpoutput --name-file=listOfGenomes.txt *fasta
 
