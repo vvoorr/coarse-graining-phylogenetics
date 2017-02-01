@@ -1,10 +1,13 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+
 use Cwd 'abs_path';
 use File::Basename;
 use lib dirname( abs_path $0 );
 
 use POSIX;
-use strict;
-use warnings;
 use List::Util qw(first max maxstr min minstr reduce shuffle sum);
 use Storable qw/dclone/;
 use CGP_lib_tree_operation qw/f_extract_clade_distMatrix_hash f_read_file_pairName_pairSNP f_cut_and_graft f_read_newick_file/;
@@ -29,8 +32,8 @@ if ($rho>0) {
 	$dt = ($dt>1/$rho/$tmp_resolution) ? 1/$rho/$tmp_resolution : $dt;
 }
 my $N = 5000;
-my $step0 = 0;
 my $theta = min(2*$mu*$N,$maxNSNP/2);
+my $N_step_relaxation = 200000;
 
 
 
@@ -88,7 +91,7 @@ my $endPairDiv = 1.3*$maxDelta;
 my ($fout_tree,$fout_score);
 open $fout_tree,">".$outputFileHeader.".record_tree" or die "can't write file $outputFileHeader\.record_tree\n";
 open $fout_score,">".$outputFileHeader.".record_score" or die "can't write file record_score\n";
-evo_mcmc5($arr_data_SNP_dist,$minMCMCstep,$NMCstep_interval,$mu,$rho,$theta,$deltaTE,$endPairDiv,$dt,$maxNSNP,$initial_distance_matrix,$arr_strain,$arr_strainPair,$mcmcTemperature,time(),$step0,$hash_strainPair2SNPdist,$mutateTreeTopology,$fout_tree,$fout_score);
+evo_mcmc5($arr_data_SNP_dist,$minMCMCstep,$NMCstep_interval,$mu,$rho,$theta,$deltaTE,$endPairDiv,$dt,$maxNSNP,$initial_distance_matrix,$arr_strain,$arr_strainPair,$mcmcTemperature,time(),0,$hash_strainPair2SNPdist,$mutateTreeTopology,$fout_tree,$fout_score);
 
 
 exit 1;
@@ -529,7 +532,7 @@ print gen_newick($clusterData).";\n";
 		# update the termination point
 		if ($treeProb>$max_score+1) {
 			$max_score = $treeProb;
-			$step_to_step = ($curStep+200000>$minMCMCstep) ? $curStep+200000 : $minMCMCstep;
+			$step_to_step = ($curStep+$N_step_relaxation>$minMCMCstep) ? $curStep+$N_step_relaxation : $minMCMCstep;
 		}
 	}	
 }
@@ -717,6 +720,10 @@ sub distmatrix2cluster {
 sub gen_newick {
 	my ($inputClusterData) = @_;
 	my $clusterData = dclone $inputClusterData;
+	
+	for my $cluster (keys %$clusterData) {
+		$clusterData->{$cluster}{height}++;	# add one because of the zero offset nature of the code
+	}
 	
 	while (1) {
 		my @lowestCluster = sort {$a cmp $b} grep {not exists $clusterData->{$_}{downstreamCluster}} keys %$clusterData;

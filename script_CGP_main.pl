@@ -1,3 +1,5 @@
+#!/usr/bin/perl -w
+
 use Cwd 'abs_path';
 use File::Basename;
 use lib dirname( abs_path $0 );
@@ -12,7 +14,7 @@ if (abs_path($0)=~/^(.+)\/script_CGP_main\.pl$/) {
 }
 
 # command example:
-# perl script_CGP_main.pl --segment-length=20 --output-file=tmpoutput --name-file=listOfGenomes.txt test_b*fasta
+# perl script_CGP_main.pl --segment-length=20 --output-file=tmpoutput --input-tree=example_initial_tree.newick --name-file=listOfGenomes.txt test_b*fasta
 
 
 
@@ -54,13 +56,12 @@ if ($file_genome_names) {
 	my $core_gene_file_txt = join(' ',@coreGeneFastaFiles);
 	system("perl $dir\/script_CGP1_concatenateCoreGenes.pl $segmentLength $filename_supergene_phylip $file_genome_names $core_gene_file_txt");
 } else {
-	# when genomes names are not given, then simply call them 1, 2, ...
-	my ($hash_genename2seq,$arr_genenames) = f_parse_fasta($coreGeneFastaFiles[0]);
-	my $Ngenomes = scalar @$arr_genenames;
+	# when genomes names are not given, then simply use the name from the first fasta file
+	my ($hash_genename2seq,$arr_genenames) = f_parse_fasta($coreGeneFastaFiles[0]);	
 	my $tmpfile = 'tmp.txt';
 	open FOUT,">$tmpfile" or die "can't write file\n";
-	for my $q (1..$Ngenomes) {
-		print FOUT "$q\n";
+	for my $name (@$arr_genenames) {
+		print FOUT "$name\n";
 	}
 	close FOUT;
 		

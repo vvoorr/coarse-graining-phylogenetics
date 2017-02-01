@@ -1,3 +1,5 @@
+#!/usr/bin/perl -w
+
 use Cwd 'abs_path';
 use File::Basename;
 use lib dirname( abs_path $0 );
@@ -29,6 +31,13 @@ close FIN;
 my @superGene_seq = ('') x @genomes;
 for my $fasta_file (@coreGeneFasta) {
 	my ($hash_genename2seq,$arr_genenames) = f_parse_fasta($fasta_file);
+	
+	# check and see if the sequences have equal length
+	for my $n (1..$#$arr_genenames) {
+		unless (length($hash_genename2seq->{$arr_genenames->[$n-1]}) == length($hash_genename2seq->{$arr_genenames->[$n]})) {
+			die "genes in file $fasta_file have unequal lengths\n\n\n\n\n\n\n\n\n\n\n";
+		}
+	}
 	
 	# push the alignment in the array $seqs
 	my $seqs = [];
