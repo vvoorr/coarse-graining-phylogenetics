@@ -51,7 +51,7 @@ for my $option (@ARGV) {
 my $filename_supergene_phylip = $outputFileName.'_trimmedSupergene.phy';
 
 # trim core gene fasta files, and concatenate the core gene sequences of a genome into a 'supergene', and write the supergene of each strain into a phylip file
-print STDERR "trim the sequences the save them in a file\n\n";
+print STDERR "trim the sequences and save them in a file\n\n";
 if ($file_genome_names) {	
 	my $core_gene_file_txt = join(' ',@coreGeneFastaFiles);
 	system("perl $dir\/script_CGP1_concatenateCoreGenes.pl $segmentLength $filename_supergene_phylip $file_genome_names $core_gene_file_txt");
