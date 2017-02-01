@@ -17,6 +17,7 @@ Example: Download the example file ‘example.tar.xz’, extract it and run the 
 	perl script_CGP_main.pl --segment-length=10 --output-file=tmpoutput --name-file=listOfGenomes.txt *fasta
 
 Optional arguments:
+
 1. --segment-length: length of a segment (default: 20)
 2. --output-file: root of names of the output files (default: output)
 3. --name-file: file containing the names of the genomes. If the name-file is not given, then the program will use the sequence names in the first fasta file
