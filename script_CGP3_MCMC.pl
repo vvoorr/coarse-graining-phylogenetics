@@ -12,6 +12,7 @@ use List::Util qw(first max maxstr min minstr reduce shuffle sum);
 use Storable qw/dclone/;
 use CGP_lib_tree_operation qw/f_extract_clade_distMatrix_hash f_read_file_pairName_pairSNP f_cut_and_graft f_read_newick_file/;
 use CGP_lib_SSP_theory qw/get_parameter_probability2 f_new_dist_map/;
+use IO::Handle;
 
 
 
@@ -270,6 +271,8 @@ print "step=$printstep\tlikelihood=$treeProb\tmu=$mu\trho=$rho\ttheta=$theta\tde
 print gen_newick($clusterData).";\n";
 			print $fout_score "$printstep\t$treeProb\t$mu\t$rho\t$theta\t$deltaTE\t$dt\n";
 			print $fout_tree gen_newick($clusterData).";\n";
+			$fout_score->autoflush;
+			$fout_tree->autoflush;
 		}	
 		
 		# the following move decide whether to change the model parameters or not
