@@ -724,6 +724,7 @@ sub gen_newick {
 	my ($inputClusterData) = @_;
 	my $clusterData = dclone $inputClusterData;
 	
+	# fix a bug, as every internal node within $clusterData has its height shifted by 1
 	my @internalNodes = sort {$a cmp $b} grep {exists $clusterData->{$_}{downstreamCluster}} keys %$clusterData;
 	foreach (@internalNodes) {
 		$clusterData->{$_}{height}++;
