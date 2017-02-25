@@ -114,7 +114,7 @@ exit 1;
 sub evo_mcmc5 {
 	my ($arr_data_SNP_dist,$minMCMCstep,$NMCstep_interval,$mu,$rho,$theta,$deltaTE,$endPairDiv,$dt,$matrixSize,$start_dist_matrix_hash_input,$arr_strains,$arrLine2StrainPairs,$MCtemperature,$curtime,$step0,$hash_strainPair2SNPdist,$mutateTreeTopology,$fout_tree,$fout_score) = @_;
 	my ($max_score,$max_score_step) = (-1e100,0);
-	my $step_to_step = $minMCMCstep;
+	my $step_to_stop = $minMCMCstep;
 
 	# generate the model
 	# input of the function: model parameters (mu,rho,theta,deltaTE,arraySize,cutOffTimeStep)
@@ -263,7 +263,7 @@ sub evo_mcmc5 {
 	};
 	
 	# start mcmc simulation
-	while ($curStep<$step_to_step) {
+	while ($curStep<$step_to_stop) {
 		# print and write the model parameters and tree
 		if ($curStep%$NMCstep_interval==0) {
 			my $printstep = $step0 + $curStep;
@@ -535,7 +535,7 @@ print gen_newick($clusterData).";\n";
 		# update the termination point
 		if ($treeProb>$max_score+1) {
 			$max_score = $treeProb;
-			$step_to_step = ($curStep+$N_step_relaxation>$minMCMCstep) ? $curStep+$N_step_relaxation : $minMCMCstep;
+			$step_to_stop = ($curStep+$N_step_relaxation>$minMCMCstep) ? $curStep+$N_step_relaxation : $minMCMCstep;
 		}
 	}	
 }
@@ -724,8 +724,9 @@ sub gen_newick {
 	my ($inputClusterData) = @_;
 	my $clusterData = dclone $inputClusterData;
 	
-	for my $cluster (keys %$clusterData) {
-		$clusterData->{$cluster}{height}++;	# add one because of the zero offset nature of the code
+	my @internalNodes = sort {$a cmp $b} grep {exists $clusterData->{$_}{downstreamCluster}} keys %$clusterData;
+	foreach (@internalNodes) {
+		$clusterData->{$_}{height}++;
 	}
 	
 	while (1) {
