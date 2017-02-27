@@ -7,7 +7,7 @@ use List::Util qw(shuffle max min sum);
 use POSIX;
 
 use Exporter qw(import);
-our @EXPORT_OK = qw/f_extract_clade_distMatrix_hash f_read_newick_file f_cut_and_graft f_read_file_pairName_pairSNP f_extract_clade_distMatrix_hash/;
+our @EXPORT_OK = qw/f_read_newick_file f_cut_and_graft f_read_file_pairName_pairSNP f_extract_clade_distMatrix_hash/;
 
 
 
@@ -336,7 +336,7 @@ sub f_extract_clade_distMatrix_hash {
 				my @rtips = grep {exists $node2downstreamNode_distance->{$ys[$r]}{$_}} @tipnodes;
 				for my $qtip (@qtips) {
 					for my $rtip (@rtips) {
-						my $tmpdist = $node2downstreamNode_distance->{$o}{$qtip} + $node2downstreamNode_distance->{$o}{$rtip};
+						my $tmpdist = ($node2downstreamNode_distance->{$o}{$qtip} + $node2downstreamNode_distance->{$o}{$rtip})/2;
 						$pairwise_distance->{$qtip}{$rtip} = $tmpdist;
 						$pairwise_distance->{$rtip}{$qtip} = $tmpdist;
 #print STDERR "$o\t$qtip\t$rtip\t$tmpdist\n";
