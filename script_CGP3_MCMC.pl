@@ -17,7 +17,7 @@ use IO::Handle;
 
 
 # perl script_CGP3_MCMC.pl tmpoutput_pairName.dat tmpoutput_pairSSP.dat 10 1000 outputFileHeader
-my ($fileWithName,$fileNSNP,$NSNPperSegment,$NMCstep_interval,$outputFileHeader,$file_newick_tree) = @ARGV;
+my ($fileWithName,$fileNSNP,$NSNPperSegment,$NMCstep_interval,$outputFileHeader,$N_step_relaxation,$file_newick_tree) = @ARGV;
 $| = 1;
 my $maxNSNP = $NSNPperSegment;
 my $mcmcTemperature = 1;
@@ -34,7 +34,8 @@ if ($rho>0) {
 }
 my $N = 5000;
 my $theta = min(2*$mu*$N,$maxNSNP/2);
-my $N_step_relaxation = 200000;
+
+$N_step_relaxation = 200000 unless $N_step_relaxation;
 
 
 
@@ -115,6 +116,8 @@ sub evo_mcmc5 {
 	my ($arr_data_SNP_dist,$minMCMCstep,$NMCstep_interval,$mu,$rho,$theta,$deltaTE,$endPairDiv,$dt,$matrixSize,$start_dist_matrix_hash_input,$arr_strains,$arrLine2StrainPairs,$MCtemperature,$curtime,$step0,$hash_strainPair2SNPdist,$mutateTreeTopology,$fout_tree,$fout_score) = @_;
 	my ($max_score,$max_score_step) = (-1e100,0);
 	my $step_to_stop = $minMCMCstep;
+	my $maxTree;
+	my @maxPara;
 
 	# generate the model
 	# input of the function: model parameters (mu,rho,theta,deltaTE,arraySize,cutOffTimeStep)
@@ -534,10 +537,18 @@ print gen_newick($clusterData).";\n";
 		};
 		# update the termination point
 		if ($treeProb>$max_score+1) {
-			$max_score = $treeProb;
+			($max_score,$maxTree,@maxPara) = ($treeProb,gen_newick($clusterData),($mu,$rho,$theta,$deltaTE));
 			$step_to_stop = ($curStep+$N_step_relaxation>$minMCMCstep) ? $curStep+$N_step_relaxation : $minMCMCstep;
 		}
-	}	
+	}
+	
+	my $printstep = $step0 + $curStep;
+print "step=$printstep\tlikelihood=$max_score\tmu=$maxPara[0]\trho=$maxPara[1]\ttheta=$maxPara[2]\tdeltaTE=$maxPara[3]\tdt=$dt\n";
+print "$maxTree;\n";
+	print $fout_score "$printstep\t$max_score\t$maxPara[0]\t$maxPara[1]\t$maxPara[2]\t$maxPara[3]\t$dt\n";
+	print "$maxTree;\n";
+	$fout_score->autoflush;
+	$fout_tree->autoflush;
 }
 
 

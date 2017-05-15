@@ -14,15 +14,17 @@ if (abs_path($0)=~/^(.+)\/script_CGP_main\.pl$/) {
 }
 
 # command example:
-# perl script_CGP_main.pl --segment-length=20 --output-file=tmpoutput --input-tree=example_initial_tree.newick --name-file=listOfGenomes.txt test_b*fasta
+# perl script_CGP_main.pl --segment-length=20 --termination-step=200000 --output-file=tmpoutput --input-tree=example_initial_tree.newick --name-file=listOfGenomes.txt test_b*fasta
 
 
 
 my @coreGeneFastaFiles;
-my ($segmentLength,$outputFileName,$file_genome_names,$file_input_tree) = (20,'output','','');
+my ($segmentLength,$terminationStep,$outputFileName,$file_genome_names,$file_input_tree) = (20,200000,'output','','');
 for my $option (@ARGV) {
 	if ($option=~/^--segment-length=(.+)$/) {
 		$segmentLength = $1;
+	} elsif ($option=~/^--termination-step=(.+)$/) {
+		$terminationStep = $1;
 	} elsif ($option=~/^--output-file=(.+)$/) {
 		$outputFileName = $1;
 	} elsif ($option=~/^--name-file=(.+)$/) {
@@ -80,4 +82,4 @@ unlink $filename_supergene_phylip;
 
 # perform the MCMC simlation
 print STDERR "perform MCMC\n";
-system("perl $dir\/script_CGP3_MCMC.pl $filename_strain_pairs $filename_SSP_each_segment $segmentLength 1000 $outputFileName $file_input_tree 2> /dev/null");
+system("perl $dir\/script_CGP3_MCMC.pl $filename_strain_pairs $filename_SSP_each_segment $segmentLength 1000 $outputFileName $terminationStep $file_input_tree 2> /dev/null");
