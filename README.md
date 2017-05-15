@@ -17,14 +17,15 @@ Example:
 1. Download and extract the example file ‘example.tar.xz’
 2. Run the command:
 
-	perl script_CGP_main.pl  --segment-length=10  --output-file=tmpoutput  --name-file=listOfGenomes.txt  example/*fasta
+	perl script_CGP_main.pl --segment-length=10 --termination-step=200000 --output-file=tmpoutput  --name-file=listOfGenomes.txt  example/*fasta
 
 Optional arguments:
 
 1. --segment-length: length of a segment (default: 20)
-2. --output-file: root of names of the output files (default: output)
-3. --name-file: file containing the names of the genomes. If the name-file is not given, then the program will use the sequence names in the first fasta file
-4. --input-tree: file containing a tree in newick format that is used as the initial tree in the MCMC simulation. If a tree is present, then the algorithm will only vary the branch length, but not the tree topology
+2. --termination-step: number of simulation steps to continue when the max score increases by not more than 1 (default 200,000)
+3. --output-file: root of names of the output files (default: output)
+4. --name-file: file containing the names of the genomes. If the name-file is not given, then the program will use the sequence names in the first fasta file
+5. --input-tree: file containing a tree in newick format that is used as the initial tree in the MCMC simulation. If a tree is present, then the algorithm will only vary the branch length, but not the tree topology
 
 
 
