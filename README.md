@@ -3,7 +3,7 @@
 
 
 Prerequisites:
-This script requires 'perl data language', see "http://pdl.perl.org/?page=install" on installation method
+It requires 'perl data language', see "http://pdl.perl.org/?page=install" on installation method.
 
 
 
