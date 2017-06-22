@@ -114,10 +114,13 @@ exit 1;
 
 sub evo_mcmc5 {
 	my ($arr_data_SNP_dist,$minMCMCstep,$NMCstep_interval,$mu,$rho,$theta,$deltaTE,$endPairDiv,$dt,$matrixSize,$start_dist_matrix_hash_input,$arr_strains,$arrLine2StrainPairs,$MCtemperature,$curtime,$step0,$hash_strainPair2SNPdist,$mutateTreeTopology,$fout_tree,$fout_score) = @_;
-	my ($max_score,$max_score_step) = (-1e100,0);
+	my ($maxx_score,$maxx_score_step) = (-1e100,0);
+	my ($sav_score,$sav_score_step) = (-1e100,0);
 	my $step_to_stop = $minMCMCstep;
-	my $maxTree;
-	my @maxPara;
+	my $maxxTree;
+	my @maxxPara;
+	my $savTree;
+	my @savPara;
 
 	# generate the model
 	# input of the function: model parameters (mu,rho,theta,deltaTE,arraySize,cutOffTimeStep)
@@ -536,17 +539,20 @@ print gen_newick($clusterData).";\n";
 			}
 		};
 		# update the termination point
-		if ($treeProb>$max_score+1) {
-			($max_score,$maxTree,@maxPara) = ($treeProb,gen_newick($clusterData),($mu,$rho,$theta,$deltaTE));
+		if ($treeProb>$sav_score+1) {
+			($sav_score,$savTree,@savPara) = ($treeProb,gen_newick($clusterData),($mu,$rho,$theta,$deltaTE));
 			$step_to_stop = ($curStep+$N_step_relaxation>$minMCMCstep) ? $curStep+$N_step_relaxation : $minMCMCstep;
+		}
+		if ($treeProb>$maxx_score) {
+			($maxx_score,$maxxTree,@maxxPara) = ($treeProb,gen_newick($clusterData),($mu,$rho,$theta,$deltaTE));			
 		}
 	}
 	
 	my $printstep = $step0 + $curStep;
-print "step=$printstep\tlikelihood=$max_score\tmu=$maxPara[0]\trho=$maxPara[1]\ttheta=$maxPara[2]\tdeltaTE=$maxPara[3]\tdt=$dt\n";
-print "$maxTree;\n";
-	print $fout_score "$printstep\t$max_score\t$maxPara[0]\t$maxPara[1]\t$maxPara[2]\t$maxPara[3]\t$dt\n";
-	print "$maxTree;\n";
+print "step=$printstep\tlikelihood=$maxx_score\tmu=$maxxPara[0]\trho=$maxxPara[1]\ttheta=$maxxPara[2]\tdeltaTE=$maxxPara[3]\tdt=$dt\n";
+print "$maxxTree;\n";
+	print $fout_score "$printstep\t$maxx_score\t$maxxPara[0]\t$maxxPara[1]\t$maxxPara[2]\t$maxxPara[3]\t$dt\n";
+	print $fout_tree "$maxxTree;\n";
 	$fout_score->autoflush;
 	$fout_tree->autoflush;
 }
