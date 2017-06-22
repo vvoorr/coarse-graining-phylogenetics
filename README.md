@@ -16,8 +16,10 @@ Example:
 
 1. Download and extract the example file ‘example.tar.xz’
 2. Run the command:
-
+	
 	perl script_CGP_main.pl --segment-length=10 --termination-step=200000 --output-file=tmpoutput  --name-file=listOfGenomes.txt  example/*fasta
+
+3. When the program ends, the parameters and tree with the highest score are saved in the files 'tmpoutput.record_score' and 'tmpoutput.record_tree'.
 
 Optional arguments:
 
