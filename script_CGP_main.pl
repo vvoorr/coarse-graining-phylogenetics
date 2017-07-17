@@ -73,6 +73,9 @@ if ($file_genome_names) {
 	unlink $tmpfile;
 }
 
+
+
+
 # convert the phylip file into SSP distribution file for CGP algorithm
 print STDERR "extract the SSP distribution of all the sequence pairs\n\n";
 my $filename_strain_pairs = $outputFileName.'_pairName.dat';
@@ -80,6 +83,6 @@ my $filename_SSP_each_segment = $outputFileName.'_pairSSP.dat';
 system("perl $dir\/script_CGP2_phylip2sspDistribution.pl $segmentLength $filename_supergene_phylip > $filename_strain_pairs 2> $filename_SSP_each_segment");
 unlink $filename_supergene_phylip;
 
-# perform the MCMC simlation
-print STDERR "perform MCMC\n";
-system("perl $dir\/script_CGP3_MCMC.pl $filename_strain_pairs $filename_SSP_each_segment $segmentLength 1000 $outputFileName $terminationStep $file_input_tree 2> /dev/null");
+# perform the Monte Carlo simlation
+print STDERR "perform Monte Carlo simlation\n";
+system("perl $dir\/script_CGP3_MonteCarlo.pl $filename_strain_pairs $filename_SSP_each_segment $segmentLength 1000 $outputFileName $terminationStep $file_input_tree 2> /dev/null");
