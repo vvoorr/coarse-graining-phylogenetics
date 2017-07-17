@@ -4,6 +4,7 @@ use Cwd 'abs_path';
 use File::Basename;
 use lib dirname( abs_path $0 );
 
+use List::Util qw/min max/;
 use strict;
 use warnings;
 use CGP_lib qw/f_print_fasta f_parse_fasta f_print_phy/;
@@ -39,36 +40,43 @@ for my $fasta_file (@coreGeneFasta) {
 		}
 	}
 	
-	# push the alignment in the array $seqs
+	# find out the positions without '-'
+	my $range_genome_with_atgc_positions;
+	for my $n (0..$#$arr_genenames) {
+		my @cur_range = ([-2,-2]);
+		my $cur_seq = $hash_genename2seq->{$arr_genenames->[$n]};
+		for my $q (0..length($cur_seq)-1) {
+			if (substr($cur_seq,$q,1)!~/\-/) {
+				if ($cur_range[$#cur_range]->[1]+1==$q) {
+					$cur_range[$#cur_range]->[1]++
+				} else {
+					push @cur_range,[$q,$q];
+				}
+			}
+		}
+		shift @cur_range;
+		if ($range_genome_with_atgc_positions) {
+			$range_genome_with_atgc_positions = f_update_list($range_genome_with_atgc_positions,\@cur_range);
+		} else {
+			$range_genome_with_atgc_positions = \@cur_range;
+		}
+	}
 	my $seqs = [];
-	for my $genename (@$arr_genenames) {
-		my @chars = split //,$hash_genename2seq->{$genename};
-		push @$seqs,\@chars;
+	for my $n (0..$#$arr_genenames) {
+		my $cur_seq = $hash_genename2seq->{$arr_genenames->[$n]};
+		for my $q (0..$#$range_genome_with_atgc_positions) {
+			my ($start,$end) = ($range_genome_with_atgc_positions->[$q][0],$range_genome_with_atgc_positions->[$q][1]);
+			$seqs->[$n] .= substr($cur_seq,$start,$end-$start+1);
+		}
 	}
-	next unless scalar(@{$seqs->[0]}) >= $NsitePerSegment;
 	
-	# remove the positions with '-' in $seqs
-	for my $q (reverse 0..$#{$seqs->[0]}) {
-		my $hasDash = 0;
-		for my $n (0..$#$seqs) {
-			if ($seqs->[$n][$q] eq '-') {
-				$hasDash = 1;
-				last;
-			}
-		}
-		if ($hasDash) {
-			for my $n (0..$#$seqs) {
-				splice @{$seqs->[$n]},$q,1;
-			}
-		}
-	}
-	next unless scalar(@{$seqs->[0]}) >= $NsitePerSegment;
+	next unless length($seqs->[0]) >= $NsitePerSegment;
 	
 	# divide genes into segments, and save the concatenated segments in @superGene_seq
-	for (my $q=0; $q<=$#{$seqs->[0]}; $q+=$NsitePerSegment) {
-		if ($q+$NsitePerSegment-1<=$#{$seqs->[0]}) {
+	for (my $q=0; $q<=length($seqs->[0])-1; $q+=$NsitePerSegment) {
+		if ($q+$NsitePerSegment<=length($seqs->[0])) {
 			for my $n (0..$#$seqs) {
-				my $tmpseq = join('',@{$seqs->[$n]}[$q..$q+$NsitePerSegment-1]);
+				my $tmpseq = substr $seqs->[$n],$q,$NsitePerSegment;
 				$superGene_seq[$n] .= $tmpseq;		
 			}
 		}
@@ -86,3 +94,48 @@ if ($outputPHYfile=~/^(.*)\.phy/) {
 	$outputFASTAfile = $outputPHYfile.".fasta";
 }
 f_print_fasta($outputFASTAfile,\@genomes,\@superGene_seq);
+
+
+
+
+
+
+
+
+
+sub f_update_list {
+	my ($arr1,$arr2) = @_;
+	
+	my ($arrA,$arrB) = ($arr1->[0][0]<$arr2->[0][0]) ? ($arr1,$arr2) : ($arr2,$arr1);
+	my @arr;
+	my $ii_start_A = 0;
+	for my $qB (0..$#$arrB) {
+		while (1) {
+			if (($arrA->[$ii_start_A][0]<=$arrB->[$qB][0]) && ($ii_start_A<$#$arrA) && ($arrA->[$ii_start_A+1][0]<=$arrB->[$qB][0])) {
+				$ii_start_A++;
+			} else {
+				last;
+			}
+		}
+		my $ii_end_A = $ii_start_A;
+		for my $qA ($ii_start_A..$#$arrA) {
+			if ($arrA->[$qA][1]>=$arrB->[$qB][1]) {
+				$ii_end_A = $qA;
+				last;
+			}
+		}
+		for my $qA ($ii_start_A..$ii_end_A) {
+			if (($arrA->[$qA][0]<=$arrB->[$qB][0]) && ($arrB->[$qB][0]<=$arrA->[$qA][1]) && ($arrA->[$qA][1]<=$arrB->[$qB][1])) {
+				push @arr,[$arrB->[$qB][0],$arrA->[$qA][1]];
+			} elsif (($arrB->[$qB][0]<=$arrA->[$qA][0]) && ($arrA->[$qA][0]<=$arrB->[$qB][1]) && ($arrB->[$qB][1]<=$arrA->[$qA][1])) {
+				push @arr,[$arrA->[$qA][0],$arrB->[$qB][1]];
+			} elsif (($arrA->[$qA][0]<=$arrB->[$qB][0]) && ($arrB->[$qB][1]<=$arrA->[$qA][1])) {
+				push @arr,[$arrB->[$qB][0],$arrB->[$qB][1]];
+			} elsif (($arrB->[$qB][0]<=$arrA->[$qA][0]) && ($arrA->[$qA][1]<=$arrB->[$qB][1])) {
+				push @arr,[$arrA->[$qA][0],$arrA->[$qA][1]];
+			}
+		}		
+	}
+	@arr = sort {$a->[0] <=> $b->[0]} @arr;
+	return \@arr;
+}
