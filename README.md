@@ -23,7 +23,7 @@ Example:
 
 Optional arguments:
 
-1. --segment-length: length of a segment (default: 20)
+1. --segment-length: length of a segment (default: 50)
 2. --termination-step: number of simulation steps to continue when the max score increases by not more than 1 (default 200,000)
 3. --output-file: root of names of the output files (default: output)
 4. --name-file: file containing the names of the genomes. If the name-file is not given, then the program will use the sequence names in the first fasta file
