@@ -14,12 +14,12 @@ if (abs_path($0)=~/^(.+)\/script_CGP_main\.pl$/) {
 }
 
 # command example:
-# perl script_CGP_main.pl --segment-length=20 --termination-step=200000 --output-file=tmpoutput --input-tree=example_initial_tree.newick --name-file=listOfGenomes.txt test_b*fasta
+# perl script_CGP_main.pl --segment-length=50 --termination-step=200000 --output-file=tmpoutput --input-tree=example_initial_tree.newick --name-file=listOfGenomes.txt test_b*fasta
 
 
 
 my @coreGeneFastaFiles;
-my ($segmentLength,$terminationStep,$outputFileName,$file_genome_names,$file_input_tree) = (20,200000,'output','','');
+my ($segmentLength,$terminationStep,$outputFileName,$file_genome_names,$file_input_tree) = (50,200000,'output','','');
 for my $option (@ARGV) {
 	if ($option=~/^--segment-length=(.+)$/) {
 		$segmentLength = $1;
