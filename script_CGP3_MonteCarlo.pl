@@ -20,7 +20,7 @@ use IO::Handle;
 my ($fileWithName,$fileNSNP,$NSNPperSegment,$NMCstep_interval,$outputFileHeader,$N_step_relaxation,$file_newick_tree) = @ARGV;
 $| = 1;
 my $maxNSNP = $NSNPperSegment;
-my $mcmcTemperature = 1;
+my $mcmcTemperature = 10;	# dummy temperature
 my $minMCMCstep = 1; # minimum number of MCMC steps
 my $maxdN = $NSNPperSegment;
 
@@ -239,6 +239,7 @@ sub evo_mcmc5 {
 	
 	# $treeProb is the log-posterior-likelihood calculated from the tree (stored in $distmap and $clusterData) and cross-entropies of different strain pairs (stored in $strainpair2Prob_hash)
 	my $treeProb = get_tree_probability2($strainpair2Prob_hash,$distmap);
+	$MCtemperature = abs($treeProb/10000);
 
 	# MCMC step counter
 	my $curStep = -1;
@@ -545,6 +546,10 @@ print gen_newick($clusterData).";\n";
 		}
 		if ($treeProb>$maxx_score) {
 			($maxx_score,$maxxTree,@maxxPara) = ($treeProb,gen_newick($clusterData),($mu,$rho,$theta,$deltaTE));			
+		}
+		
+		if ($curStep%50000==0) {
+			$MCtemperature = $MCtemperature/2;
 		}
 	}
 	
